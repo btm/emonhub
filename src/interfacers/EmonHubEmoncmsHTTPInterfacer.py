@@ -54,6 +54,7 @@ class EmonHubEmoncmsHTTPInterfacer(EmonHubInterfacer):
                     
                         # only try to prepare and send data if there is any
                         if len(self._sub_channels[channel])>0:
+                            self._log.debug("subchannel length: "+str(len(self._sub_channels[channel])))
                             
                             bulkdata = []
                             
@@ -67,7 +68,8 @@ class EmonHubEmoncmsHTTPInterfacer(EmonHubInterfacer):
                                         f.append(i)
                                     if cargo.rssi:
                                         f.append(cargo.rssi)
-                                    self._log.info(str(cargo.uri) + " adding frame to buffer => "+ str(f))
+                                    # removed for now as results in excessive logs
+                                    # self._log.info(str(cargo.uri) + " adding frame to buffer => "+ str(f))
                                 except:
                                     self._log.warning("Failed to create emonCMS frame " + str(f))
                                     
@@ -75,7 +77,7 @@ class EmonHubEmoncmsHTTPInterfacer(EmonHubInterfacer):
                             
                             # Get the length of the data to be sent
                             bulkdata_length = len(bulkdata)
-                            self._log.debug("Sending bulkdata, length: "+str(bulkdata_length))
+                            self._log.debug("Attempting to send bulkdata, length: "+str(bulkdata_length))
                             
                             # Attempt to send the data
                             success = self.bulkpost(bulkdata)
