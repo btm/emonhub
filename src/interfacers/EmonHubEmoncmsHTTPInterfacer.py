@@ -33,13 +33,20 @@ class EmonHubEmoncmsHTTPInterfacer(EmonHubInterfacer):
         self.lastsentstatus = time.time()
         
     def action(self):
-    
+
+        # Only send data or send status if apikey is set and valid
+        if not 'apikey' in self._settings.keys() or str.__len__(str(self._settings['apikey'])) != 32 \
+                or str.lower(str(self._settings['apikey'])) == 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx':
+            return False
+        
+        # Get current time
         now = time.time()
         
         if (now-self.lastsent) > (int(self._settings['sendinterval'])):
             self.lastsent = now
-            
+
             if int(self._settings['senddata']):
+                
                 # It might be better here to combine the output from all sub channels 
                 # into a single bulk post, most of the time there is only one sub channel
                 for channel in self._settings["subchannels"]:
@@ -60,7 +67,7 @@ class EmonHubEmoncmsHTTPInterfacer(EmonHubInterfacer):
                                         f.append(i)
                                     if cargo.rssi:
                                         f.append(cargo.rssi)
-                                    self._log.debug(str(cargo.uri) + " adding frame to buffer => "+ str(f))
+                                    self._log.info(str(cargo.uri) + " adding frame to buffer => "+ str(f))
                                 except:
                                     self._log.warning("Failed to create emonCMS frame " + str(f))
                                     
@@ -90,10 +97,6 @@ class EmonHubEmoncmsHTTPInterfacer(EmonHubInterfacer):
                 self.sendstatus()
             
     def bulkpost(self,databuffer):
-    
-        if not 'apikey' in self._settings.keys() or str.__len__(str(self._settings['apikey'])) != 32 \
-                or str.lower(str(self._settings['apikey'])) == 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx':
-            return False
             
         data_string = json.dumps(databuffer, separators=(',', ':'))
         
@@ -165,9 +168,6 @@ class EmonHubEmoncmsHTTPInterfacer(EmonHubInterfacer):
             return reply
             
     def sendstatus(self):
-        if not 'apikey' in self._settings.keys() or str.__len__(str(self._settings['apikey'])) != 32 \
-                or str.lower(str(self._settings['apikey'])) == 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx':
-            return
         
         # MYIP url
         post_url = self._settings['url']+'/myip/set.json?apikey='
