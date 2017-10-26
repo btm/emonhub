@@ -34,7 +34,9 @@ class EmonHubEmoncmsHTTPInterfacer(EmonHubInterfacer):
         
     def action(self):
     
-        self._log.debug("subchannel length: "+str(len(self._sub_channels[channel])))
+        for channel in self._settings["subchannels"]:
+            if channel in self._sub_channels:
+                self._log.debug("subchannel length: "+str(len(self._sub_channels[channel])))
 
         # Only send data or send status if apikey is set and valid
         if not 'apikey' in self._settings.keys() or str.__len__(str(self._settings['apikey'])) != 32 \
